@@ -16,20 +16,24 @@ def process(input, output, password):
             
             for (index, row) in enumerate(page.extract_table()):
                 if index == 0 or row[0] == "" or row[0] == None:
+                    if len(row) > 2 and row[1] in ['SUDHIR MISHRA', 'AKANSHA GUPTA', 'HIMANSHU GUPTA']:
+                        card_name = row[1]
                     continue
 
                 amount_index = len(row) - 2
                 
-                print(row)
+                # print(row)
 
                 indian.append({
                     "date": row[0].replace("null",""),
                     "description": row[1],
                     "currency": "INR",
+                    "rp": row[2],
                     "forex_amount": "",
                     "forex_rate": "",
                     "amount": row[amount_index].replace("Cr",""),
-                    "type": "Cr" if "Cr" in row[amount_index] else "Dr"
+                    "type": "Cr" if "Cr" in row[amount_index] else "Dr",
+                    "card_name": card_name
                 })
         
                 total_amount += sum(float(item["amount"].replace(",","")) * (0 if item["type"] == "Cr" else 1) for item in indian)
@@ -71,7 +75,7 @@ def process(input, output, password):
     combined.extend(indian)
     combined.extend(foreign)
 
-    fields = ["date", "currency", "description", "forex_amount", "forex_rate", "amount", "type"]
+    fields = ["date", "currency", "description", "rp", "forex_amount", "forex_rate", "amount", "type", "card_name"]
     with open(output, 'w') as file:
         writer = csv.DictWriter(file, delimiter=',', lineterminator='\n', quoting=csv.QUOTE_ALL, fieldnames=fields)
         writer.writeheader()
